@@ -4,26 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6b345eef-03a2-40c6-b1bb-650bd3059cee" name="Changes" comment="Secondo Commit - Prima Giornata e pip install">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SETUP_GUIDE.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/happygreen/management/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/happygreen/management/commands/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/happygreen/management/commands/create_initial_data.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/happygreen/permissions.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/happygreen/signals.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+    <list default="true" id="6b345eef-03a2-40c6-b1bb-650bd3059cee" name="Changes" comment="Terzo Commit - Seconda Giornata e risoluzione errori">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend_happygreen/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend_happygreen/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend_happygreen/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend_happygreen/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/happygreen/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/happygreen/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/happygreen/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/happygreen/apps.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/happygreen/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/happygreen/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/happygreen/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/happygreen/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/happygreen/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/happygreen/urls.py" afterDir="false" />
+    </list>
+    <list id="1ef2569d-63e2-4fe5-a7ea-ff02aa343cd4" name="Changes by dansa" comment="">
       <change beforePath="$PROJECT_DIR$/happygreen/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/happygreen/views.py" afterDir="false" />
     </list>
-    <list id="fed18ecd-1205-417e-bdc2-24bafcfc8877" name="Changes by dansa" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -131,7 +120,7 @@
       <option name="presentableId" value="Default" />
       <updated>1745836074447</updated>
       <workItem from="1745836075412" duration="1846000" />
-      <workItem from="1746003116656" duration="2285000" />
+      <workItem from="1746003116656" duration="3900000" />
     </task>
     <task id="LOCAL-00001" summary="Primo Commit - Progetto Vuoto">
       <option name="closed" value="true" />
@@ -149,7 +138,15 @@
       <option name="project" value="LOCAL" />
       <updated>1746003298970</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Terzo Commit - Seconda Giornata e risoluzione errori">
+      <option name="closed" value="true" />
+      <created>1746005632475</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1746005632475</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -181,6 +178,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Primo Commit - Progetto Vuoto" />
     <MESSAGE value="Secondo Commit - Prima Giornata e pip install" />
-    <option name="LAST_COMMIT_MESSAGE" value="Secondo Commit - Prima Giornata e pip install" />
+    <MESSAGE value="Terzo Commit - Seconda Giornata e risoluzione errori" />
+    <option name="LAST_COMMIT_MESSAGE" value="Terzo Commit - Seconda Giornata e risoluzione errori" />
   </component>
 </project>

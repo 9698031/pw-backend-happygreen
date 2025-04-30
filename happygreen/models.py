@@ -47,7 +47,7 @@ class Group(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_groups')
-    members = models.ManyToManyField(User, related_name='groups', through='GroupMembership')
+    members = models.ManyToManyField(User, related_name='happygreen_groups', through='GroupMembership')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
