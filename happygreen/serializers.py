@@ -1,43 +1,85 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import (
-    UserProfile, Group, GroupMembership, Post, PostImage, Location, Comment,
-    Badge, UserBadge, Challenge, UserChallenge, Quiz, QuizQuestion, QuizAnswer,
-    Product, RecognizedObject
+    Profile, Badge, UserBadge, Group, GroupMembership, Post, Comment,
+    RecognizedObject, ScanRecord, Quiz, QuizQuestion, QuizOption,
+    QuizAttempt, Challenge, ChallengeParticipation, Product, ProductScan
 )
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'first_name', 'last_name')
-        read_only_fields = ('email',)
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'date_joined']
+        read_only_fields = ['date_joined']
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    password2 = serializers.CharField(style={'input_type': 'password'}, write_only=True)
 
     class Meta:
-        model = UserProfile
-        fields = ('id', 'user', 'bio', 'profile_picture', 'date_joined', 'eco_score')
+        model = User
+        fields = ['username', 'email', 'password', 'password2', 'first_name', 'last_name']
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+
+    def validate(self, data):
+        if data['password'] != data['password2']:
+            raise serializers.ValidationError({"password": "Password fields didn't match."})
+        return data
+
+    def create(self, validated_data):
+        validated_data.pop('password2')
+        user = User.objects.create_user(**validated_data)
+        Profile.objects.create(user=user)
+        return user
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    email = serializers.EmailField(source='user.email', read_only=True)
+
+    class Meta:
+        model = Profile
+        fields = ['id', 'username', 'email', 'bio', 'avatar', 'points', 'created_at']
+        read_only_fields = ['points', 'created_at']
+
+
+class BadgeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Badge
+        fields = ['id', 'name', 'description', 'icon', 'points_required', 'created_at']
+        read_only_fields = ['created_at']
+
+
+class UserBadgeSerializer(serializers.ModelSerializer):
+    badge_details = BadgeSerializer(source='badge', read_only=True)
+    username = serializers.CharField(source='user.username', read_only=True)
+
+    class Meta:
+        model = UserBadge
+        fields = ['id', 'username', 'badge_details', 'earned_at']
+        read_only_fields = ['earned_at']
 
 
 class GroupMembershipSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
+    username = serializers.CharField(source='user.username', read_only=True)
 
     class Meta:
         model = GroupMembership
-        fields = ('id', 'user', 'joined_at', 'is_admin')
+        fields = ['id', 'username', 'role', 'joined_at']
+        read_only_fields = ['joined_at']
 
 
 class GroupSerializer(serializers.ModelSerializer):
-    creator = UserSerializer(read_only=True)
+    creator_username = serializers.CharField(source='creator.username', read_only=True)
     members_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Group
-        fields = ('id', 'name', 'description', 'created_at', 'creator',
-                  'group_picture', 'members_count')
+        fields = ['id', 'name', 'description', 'creator_username', 'members_count', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
 
     def get_members_count(self, obj):
         return obj.members.count()
@@ -47,224 +89,161 @@ class GroupDetailSerializer(GroupSerializer):
     members = GroupMembershipSerializer(source='groupmembership_set', many=True, read_only=True)
 
     class Meta(GroupSerializer.Meta):
-        fields = GroupSerializer.Meta.fields + ('members',)
-
-
-class LocationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Location
-        fields = ('id', 'latitude', 'longitude', 'address', 'name')
-
-
-class PostImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PostImage
-        fields = ('id', 'image', 'ml_tags', 'uploaded_at')
+        fields = GroupSerializer.Meta.fields + ['members']
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    author = UserSerializer(read_only=True)
-    replies = serializers.SerializerMethodField()
+    author_username = serializers.CharField(source='author.username', read_only=True)
 
     class Meta:
         model = Comment
-        fields = ('id', 'author', 'content', 'created_at', 'parent', 'replies')
-
-    def get_replies(self, obj):
-        if obj.replies.exists():
-            return CommentSerializer(obj.replies.all(), many=True).data
-        return []
+        fields = ['id', 'author_username', 'content', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
 
 
 class PostSerializer(serializers.ModelSerializer):
-    author = UserSerializer(read_only=True)
-    group = GroupSerializer(read_only=True)
-    likes_count = serializers.SerializerMethodField()
+    author_username = serializers.CharField(source='author.username', read_only=True)
+    group_name = serializers.CharField(source='group.name', read_only=True)
     comments_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
-        fields = ('id', 'title', 'content', 'author', 'group', 'created_at',
-                  'updated_at', 'post_type', 'likes_count', 'comments_count')
-
-    def get_likes_count(self, obj):
-        return obj.likes.count()
+        fields = [
+            'id', 'title', 'content', 'author_username', 'group_name', 'group',
+            'image', 'latitude', 'longitude', 'location_name', 'comments_count',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
 
     def get_comments_count(self, obj):
         return obj.comments.count()
 
 
 class PostDetailSerializer(PostSerializer):
-    images = PostImageSerializer(many=True, read_only=True)
-    location = LocationSerializer(read_only=True)
     comments = CommentSerializer(many=True, read_only=True)
 
     class Meta(PostSerializer.Meta):
-        fields = PostSerializer.Meta.fields + ('images', 'location', 'comments')
-
-
-class BadgeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Badge
-        fields = ('id', 'name', 'description', 'icon', 'points')
-
-
-class UserBadgeSerializer(serializers.ModelSerializer):
-    badge = BadgeSerializer(read_only=True)
-    user = UserSerializer(read_only=True)
-
-    class Meta:
-        model = UserBadge
-        fields = ('id', 'user', 'badge', 'earned_at')
-
-
-class QuizAnswerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = QuizAnswer
-        fields = ('id', 'answer_text', 'is_correct')
-
-
-class QuizQuestionSerializer(serializers.ModelSerializer):
-    answers = QuizAnswerSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = QuizQuestion
-        fields = ('id', 'question_text', 'order', 'answers')
-
-
-class QuizSerializer(serializers.ModelSerializer):
-    questions = QuizQuestionSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Quiz
-        fields = ('id', 'title', 'description', 'questions')
-
-
-class ChallengeSerializer(serializers.ModelSerializer):
-    creator = UserSerializer(read_only=True)
-    group = GroupSerializer(read_only=True)
-    badge = BadgeSerializer(read_only=True)
-    participants_count = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Challenge
-        fields = ('id', 'title', 'description', 'challenge_type', 'points',
-                  'created_at', 'expires_at', 'creator', 'group', 'badge',
-                  'participants_count')
-
-    def get_participants_count(self, obj):
-        return obj.participants.count()
-
-
-class ChallengeDetailSerializer(ChallengeSerializer):
-    quiz = QuizSerializer(read_only=True)
-
-    class Meta(ChallengeSerializer.Meta):
-        fields = ChallengeSerializer.Meta.fields + ('quiz',)
-
-
-class UserChallengeSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-    challenge = ChallengeSerializer(read_only=True)
-
-    class Meta:
-        model = UserChallenge
-        fields = ('id', 'user', 'challenge', 'completed', 'completed_at')
-
-
-class ProductSerializer(serializers.ModelSerializer):
-    alternatives = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Product
-        fields = ('id', 'barcode', 'name', 'description', 'sustainability_score',
-                  'is_recyclable', 'eco_information', 'alternatives')
-
-    def get_alternatives(self, obj):
-        return ProductSerializer(obj.alternative_products.all(), many=True, context=self.context).data
+        fields = PostSerializer.Meta.fields + ['comments']
 
 
 class RecognizedObjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = RecognizedObject
-        fields = ('id', 'name', 'category', 'description', 'recycle_info', 'environmental_impact')
+        fields = [
+            'id', 'name', 'description', 'category', 'eco_impact',
+            'recycling_info', 'sustainability_score', 'image', 'created_at'
+        ]
+        read_only_fields = ['created_at']
 
 
-# Serializers for creating and updating objects
-class UserCreateSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
-
-    class Meta:
-        model = User
-        fields = ('username', 'email', 'password', 'first_name', 'last_name')
-
-    def create(self, validated_data):
-        user = User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data.get('email', ''),
-            password=validated_data['password'],
-            first_name=validated_data.get('first_name', ''),
-            last_name=validated_data.get('last_name', '')
-        )
-        return user
-
-
-class UserProfileCreateUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserProfile
-        fields = ('bio', 'profile_picture')
-
-
-class GroupCreateUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Group
-        fields = ('name', 'description', 'group_picture')
-
-    def create(self, validated_data):
-        user = self.context['request'].user
-        group = Group.objects.create(creator=user, **validated_data)
-        GroupMembership.objects.create(user=user, group=group, is_admin=True)
-        return group
-
-
-class PostCreateUpdateSerializer(serializers.ModelSerializer):
-    location = LocationSerializer(required=False)
+class ScanRecordSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    object_name = serializers.CharField(source='recognized_object.name', read_only=True)
+    object_details = RecognizedObjectSerializer(source='recognized_object', read_only=True)
 
     class Meta:
-        model = Post
-        fields = ('title', 'content', 'post_type', 'group', 'location')
-
-    def create(self, validated_data):
-        location_data = validated_data.pop('location', None)
-        user = self.context['request'].user
-        post = Post.objects.create(author=user, **validated_data)
-
-        if location_data:
-            Location.objects.create(post=post, **location_data)
-
-        return post
-
-    def update(self, instance, validated_data):
-        location_data = validated_data.pop('location', None)
-
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-
-        if location_data:
-            location, created = Location.objects.get_or_create(post=instance)
-            for attr, value in location_data.items():
-                setattr(location, attr, value)
-            location.save()
-
-        return instance
+        model = ScanRecord
+        fields = [
+            'id', 'username', 'object_name', 'object_details', 'image',
+            'latitude', 'longitude', 'location_name', 'created_at'
+        ]
+        read_only_fields = ['created_at']
 
 
-class CommentCreateSerializer(serializers.ModelSerializer):
+class QuizOptionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Comment
-        fields = ('post', 'content', 'parent')
+        model = QuizOption
+        fields = ['id', 'text', 'is_correct']
+        extra_kwargs = {
+            'is_correct': {'write_only': True}  # Hide correct answer in response
+        }
 
-    def create(self, validated_data):
-        user = self.context['request'].user
-        return Comment.objects.create(author=user, **validated_data)
+
+class QuizQuestionSerializer(serializers.ModelSerializer):
+    options = QuizOptionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = QuizQuestion
+        fields = ['id', 'question', 'options', 'created_at']
+        read_only_fields = ['created_at']
+
+
+class QuizSerializer(serializers.ModelSerializer):
+    questions_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Quiz
+        fields = ['id', 'title', 'description', 'points', 'questions_count', 'created_at']
+        read_only_fields = ['created_at']
+
+    def get_questions_count(self, obj):
+        return obj.questions.count()
+
+
+class QuizDetailSerializer(QuizSerializer):
+    questions = QuizQuestionSerializer(many=True, read_only=True)
+
+    class Meta(QuizSerializer.Meta):
+        fields = QuizSerializer.Meta.fields + ['questions']
+
+
+class QuizAttemptSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    quiz_title = serializers.CharField(source='quiz.title', read_only=True)
+
+    class Meta:
+        model = QuizAttempt
+        fields = [
+            'id', 'username', 'quiz_title', 'quiz', 'score',
+            'completed', 'started_at', 'completed_at'
+        ]
+        read_only_fields = ['started_at', 'completed_at']
+
+
+class ChallengeSerializer(serializers.ModelSerializer):
+    participants_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Challenge
+        fields = [
+            'id', 'title', 'description', 'points', 'participants_count',
+            'start_date', 'end_date', 'created_at'
+        ]
+        read_only_fields = ['created_at']
+
+    def get_participants_count(self, obj):
+        return obj.participants.count()
+
+
+class ChallengeParticipationSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    challenge_title = serializers.CharField(source='challenge.title', read_only=True)
+
+    class Meta:
+        model = ChallengeParticipation
+        fields = [
+            'id', 'username', 'challenge_title', 'challenge',
+            'completed', 'joined_at', 'completed_at'
+        ]
+        read_only_fields = ['joined_at', 'completed_at']
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = [
+            'id', 'barcode', 'name', 'description', 'manufacturer',
+            'eco_friendly', 'recyclable', 'sustainability_score',
+            'eco_info', 'alternatives', 'image', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class ProductScanSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    product_details = ProductSerializer(source='product', read_only=True)
+
+    class Meta:
+        model = ProductScan
+        fields = ['id', 'username', 'product_details', 'created_at']
+        read_only_fields = ['created_at']

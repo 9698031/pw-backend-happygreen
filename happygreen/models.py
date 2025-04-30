@@ -1,226 +1,237 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.utils import timezone
+from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
-class UserProfile(models.Model):
+class Profile(models.Model):
+    """Estensione del modello User per informazioni aggiuntive"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     bio = models.TextField(max_length=500, blank=True)
-    profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
-    date_joined = models.DateTimeField(default=timezone.now)
-    eco_score = models.IntegerField(default=0, validators=[MinValueValidator(0)])
-
-    def __str__(self):
-        return f"{self.user.username}'s Profile"
-
-
-class Group(models.Model):
-    name = models.CharField(max_length=100)
-    description = models.TextField(max_length=500, blank=True)
-    created_at = models.DateTimeField(default=timezone.now)
-    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_groups')
-    members = models.ManyToManyField(User, through='GroupMembership', related_name='member_groups')
-    group_picture = models.ImageField(upload_to='group_pictures/', blank=True, null=True)
-
-    def __str__(self):
-        return self.name
-
-
-class GroupMembership(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    group = models.ForeignKey(Group, on_delete=models.CASCADE)
-    joined_at = models.DateTimeField(default=timezone.now)
-    is_admin = models.BooleanField(default=False)
-
-    class Meta:
-        unique_together = ('user', 'group')
-
-    def __str__(self):
-        return f"{self.user.username} in {self.group.name}"
-
-
-class Post(models.Model):
-    POST_TYPES = (
-        ('PHOTO', 'Photo'),
-        ('CHALLENGE', 'Challenge'),
-        ('INFO', 'Information'),
-        ('BARCODE', 'Barcode Scan'),
-    )
-
-    title = models.CharField(max_length=200)
-    content = models.TextField()
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
-    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='posts', null=True, blank=True)
-    created_at = models.DateTimeField(default=timezone.now)
+    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
+    points = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    post_type = models.CharField(max_length=10, choices=POST_TYPES, default='PHOTO')
-    likes = models.ManyToManyField(User, related_name='liked_posts', blank=True)
 
     def __str__(self):
-        return self.title
-
-    class Meta:
-        ordering = ['-created_at']
-
-
-class PostImage(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='post_images/')
-    ml_tags = models.JSONField(default=dict, blank=True)  # Store ML recognition data
-    uploaded_at = models.DateTimeField(default=timezone.now)
-
-    def __str__(self):
-        return f"Image for {self.post.title}"
-
-
-class Location(models.Model):
-    post = models.OneToOneField(Post, on_delete=models.CASCADE, related_name='location')
-    latitude = models.FloatField()
-    longitude = models.FloatField()
-    address = models.CharField(max_length=255, blank=True)
-    name = models.CharField(max_length=100, blank=True)
-
-    def __str__(self):
-        return f"{self.name or self.address or 'Location'} at ({self.latitude}, {self.longitude})"
-
-
-class Comment(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
-    content = models.TextField()
-    created_at = models.DateTimeField(default=timezone.now)
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
-
-    def __str__(self):
-        return f"Comment by {self.author.username} on {self.post.title}"
-
-    class Meta:
-        ordering = ['created_at']
+        return f"{self.user.username}'s profile"
 
 
 class Badge(models.Model):
+    """Badge ottenibili dagli utenti"""
     name = models.CharField(max_length=100)
     description = models.TextField()
-    icon = models.ImageField(upload_to='badge_icons/')
-    points = models.IntegerField(default=0)
+    icon = models.ImageField(upload_to='badges/')
+    points_required = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
 
 
 class UserBadge(models.Model):
+    """Relazione tra utenti e badge"""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='badges')
-    badge = models.ForeignKey(Badge, on_delete=models.CASCADE, related_name='users')
-    earned_at = models.DateTimeField(default=timezone.now)
+    badge = models.ForeignKey(Badge, on_delete=models.CASCADE)
+    earned_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('user', 'badge')
 
     def __str__(self):
-        return f"{self.user.username} earned {self.badge.name}"
+        return f"{self.user.username} - {self.badge.name}"
 
 
-class Challenge(models.Model):
-    CHALLENGE_TYPES = (
-        ('SCAN', 'Scan Objects'),
-        ('QUIZ', 'Quiz'),
-        ('RECYCLE', 'Recycling'),
-        ('BARCODE', 'Barcode Scan'),
-    )
+class Group(models.Model):
+    """Gruppi di amici"""
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_groups')
+    members = models.ManyToManyField(User, related_name='groups', through='GroupMembership')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.name
+
+
+class GroupMembership(models.Model):
+    """Relazione tra utenti e gruppi con ruoli"""
+    ROLE_CHOICES = [
+        ('ADMIN', 'Administrator'),
+        ('MEMBER', 'Member'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='MEMBER')
+    joined_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'group')
+
+    def __str__(self):
+        return f"{self.user.username} in {self.group.name} as {self.role}"
+
+
+class Post(models.Model):
+    """Post condivisi nei gruppi"""
     title = models.CharField(max_length=200)
-    description = models.TextField()
-    challenge_type = models.CharField(max_length=10, choices=CHALLENGE_TYPES)
-    points = models.IntegerField(default=10)
-    created_at = models.DateTimeField(default=timezone.now)
-    expires_at = models.DateTimeField(null=True, blank=True)
-    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_challenges')
-    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='challenges', null=True, blank=True)
-    badge = models.ForeignKey(Badge, on_delete=models.SET_NULL, null=True, blank=True, related_name='challenges')
+    content = models.TextField()
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='posts')
+    image = models.ImageField(upload_to='posts/', null=True, blank=True)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    location_name = models.CharField(max_length=100, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.title
 
-    class Meta:
-        ordering = ['-created_at']
 
-
-class UserChallenge(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='challenges')
-    challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE, related_name='participants')
-    completed = models.BooleanField(default=False)
-    completed_at = models.DateTimeField(null=True, blank=True)
-
-    class Meta:
-        unique_together = ('user', 'challenge')
+class Comment(models.Model):
+    """Commenti sui post"""
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.challenge.title}"
+        return f"Comment by {self.author.username} on {self.post.title}"
+
+
+class RecognizedObject(models.Model):
+    """Oggetti che possono essere riconosciuti dall'app"""
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    category = models.CharField(max_length=100)  # plastica, carta, vetro, ecc.
+    eco_impact = models.TextField()  # impatto ecologico
+    recycling_info = models.TextField()  # info sul riciclaggio
+    sustainability_score = models.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(10)]
+    )
+    image = models.ImageField(upload_to='objects/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
+class ScanRecord(models.Model):
+    """Registrazione di oggetti scansionati dagli utenti"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='scans')
+    recognized_object = models.ForeignKey(RecognizedObject, on_delete=models.CASCADE, related_name='scans')
+    image = models.ImageField(upload_to='scans/')
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    location_name = models.CharField(max_length=100, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} scanned {self.recognized_object.name}"
 
 
 class Quiz(models.Model):
-    challenge = models.OneToOneField(Challenge, on_delete=models.CASCADE, related_name='quiz')
+    """Quiz sulla sostenibilità"""
     title = models.CharField(max_length=200)
-    description = models.TextField(blank=True)
+    description = models.TextField()
+    points = models.IntegerField(default=10)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
 
 
 class QuizQuestion(models.Model):
+    """Domande del quiz"""
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questions')
-    question_text = models.TextField()
-    order = models.IntegerField(default=0)
+    question = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.question_text
-
-    class Meta:
-        ordering = ['order']
+        return self.question
 
 
-class QuizAnswer(models.Model):
-    question = models.ForeignKey(QuizQuestion, on_delete=models.CASCADE, related_name='answers')
-    answer_text = models.TextField()
+class QuizOption(models.Model):
+    """Opzioni di risposta per le domande del quiz"""
+    question = models.ForeignKey(QuizQuestion, on_delete=models.CASCADE, related_name='options')
+    text = models.CharField(max_length=255)
     is_correct = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.answer_text
+        return self.text
+
+
+class QuizAttempt(models.Model):
+    """Tentativi di quiz da parte degli utenti"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='quiz_attempts')
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='attempts')
+    score = models.IntegerField(default=0)
+    completed = models.BooleanField(default=False)
+    started_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s attempt on {self.quiz.title}"
+
+
+class Challenge(models.Model):
+    """Sfide ecologiche"""
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    points = models.IntegerField(default=50)
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+
+class ChallengeParticipation(models.Model):
+    """Partecipazione degli utenti alle sfide"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='challenges')
+    challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE, related_name='participants')
+    completed = models.BooleanField(default=False)
+    joined_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('user', 'challenge')
+
+    def __str__(self):
+        return f"{self.user.username} in challenge {self.challenge.title}"
 
 
 class Product(models.Model):
-    barcode = models.CharField(max_length=100, unique=True)
+    """Prodotti scansionabili con codice a barre"""
+    barcode = models.CharField(max_length=50, unique=True)
     name = models.CharField(max_length=200)
-    description = models.TextField(blank=True)
-    sustainability_score = models.IntegerField(
-        default=0,
-        validators=[MinValueValidator(0), MaxValueValidator(100)]
-    )
-    is_recyclable = models.BooleanField(default=False)
-    eco_information = models.TextField(blank=True)
-    alternative_products = models.ManyToManyField('self', blank=True, symmetrical=False)
-
-    def __str__(self):
-        return self.name
-
-
-class RecognizedObject(models.Model):
-    OBJECT_CATEGORIES = (
-        ('PLASTIC', 'Plastic'),
-        ('PAPER', 'Paper'),
-        ('GLASS', 'Glass'),
-        ('METAL', 'Metal'),
-        ('ORGANIC', 'Organic'),
-        ('ELECTRONIC', 'Electronic'),
-        ('OTHER', 'Other'),
-    )
-
-    name = models.CharField(max_length=100)
-    category = models.CharField(max_length=10, choices=OBJECT_CATEGORIES, default='OTHER')
     description = models.TextField()
-    recycle_info = models.TextField()
-    environmental_impact = models.TextField()
+    manufacturer = models.CharField(max_length=200, blank=True)
+    eco_friendly = models.BooleanField(default=False)
+    recyclable = models.BooleanField(default=False)
+    sustainability_score = models.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(10)]
+    )
+    eco_info = models.TextField()  # informazioni sull'impatto ecologico
+    alternatives = models.TextField(blank=True)  # alternative eco-friendly
+    image = models.ImageField(upload_to='products/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.barcode})"
+
+
+class ProductScan(models.Model):
+    """Registrazione di prodotti scansionati dagli utenti"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='product_scans')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='scans')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} scanned {self.product.name}"

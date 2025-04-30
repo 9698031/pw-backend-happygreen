@@ -4,15 +4,26 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6b345eef-03a2-40c6-b1bb-650bd3059cee" name="Changes" comment="Primo Commit - Progetto Vuoto">
-      <change afterPath="$PROJECT_DIR$/happygreen/serializers.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/happygreen/urls.py" afterDir="false" />
+    <list default="true" id="6b345eef-03a2-40c6-b1bb-650bd3059cee" name="Changes" comment="Secondo Commit - Prima Giornata e pip install">
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/SETUP_GUIDE.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/happygreen/management/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/happygreen/management/commands/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/happygreen/management/commands/create_initial_data.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/happygreen/permissions.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/happygreen/signals.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend_happygreen/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend_happygreen/settings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend_happygreen/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend_happygreen/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/happygreen/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/happygreen/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/happygreen/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/happygreen/apps.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/happygreen/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/happygreen/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/happygreen/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/happygreen/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/happygreen/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/happygreen/views.py" afterDir="false" />
     </list>
+    <list id="fed18ecd-1205-417e-bdc2-24bafcfc8877" name="Changes by dansa" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -33,9 +44,9 @@
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {}
-}]]></component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {}
+}</component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/9698031/pw-backend-happygreen.git&quot;,
@@ -47,6 +58,9 @@
   &quot;associatedIndex&quot;: 6
 }</component>
   <component name="ProjectId" id="2wM0KnY9so7e9exBDAxme5MKhqw" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -69,6 +83,11 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\PYTHON\backend-happygreen" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration name="backend-happygreen" type="Python.DjangoServer" factoryName="Django server">
       <module name="backend-happygreen" />
@@ -112,6 +131,7 @@
       <option name="presentableId" value="Default" />
       <updated>1745836074447</updated>
       <workItem from="1745836075412" duration="1846000" />
+      <workItem from="1746003116656" duration="2285000" />
     </task>
     <task id="LOCAL-00001" summary="Primo Commit - Progetto Vuoto">
       <option name="closed" value="true" />
@@ -121,7 +141,15 @@
       <option name="project" value="LOCAL" />
       <updated>1745836268028</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Secondo Commit - Prima Giornata e pip install">
+      <option name="closed" value="true" />
+      <created>1746003298970</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1746003298970</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -152,6 +180,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Primo Commit - Progetto Vuoto" />
-    <option name="LAST_COMMIT_MESSAGE" value="Primo Commit - Progetto Vuoto" />
+    <MESSAGE value="Secondo Commit - Prima Giornata e pip install" />
+    <option name="LAST_COMMIT_MESSAGE" value="Secondo Commit - Prima Giornata e pip install" />
   </component>
 </project>

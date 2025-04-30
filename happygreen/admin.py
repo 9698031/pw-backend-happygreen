@@ -1,97 +1,109 @@
 from django.contrib import admin
 from .models import (
-    UserProfile, Group, GroupMembership, Post, PostImage, Location, Comment,
-    Badge, UserBadge, Challenge, UserChallenge, Quiz, QuizQuestion, QuizAnswer,
-    Product, RecognizedObject
+    Profile, Badge, UserBadge, Group, GroupMembership, Post, Comment,
+    RecognizedObject, ScanRecord, Quiz, QuizQuestion, QuizOption,
+    QuizAttempt, Challenge, ChallengeParticipation, Product, ProductScan
 )
 
-@admin.register(UserProfile)
-class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'eco_score', 'date_joined')
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'points', 'created_at')
     search_fields = ('user__username', 'user__email')
 
-@admin.register(Group)
-class GroupAdmin(admin.ModelAdmin):
-    list_display = ('name', 'creator', 'created_at')
-    search_fields = ('name', 'description')
-
-@admin.register(GroupMembership)
-class GroupMembershipAdmin(admin.ModelAdmin):
-    list_display = ('user', 'group', 'joined_at', 'is_admin')
-    list_filter = ('is_admin', 'joined_at')
-    search_fields = ('user__username', 'group__name')
-
-@admin.register(Post)
-class PostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author', 'group', 'post_type', 'created_at')
-    list_filter = ('post_type', 'created_at')
-    search_fields = ('title', 'content', 'author__username')
-    date_hierarchy = 'created_at'
-
-@admin.register(PostImage)
-class PostImageAdmin(admin.ModelAdmin):
-    list_display = ('post', 'uploaded_at')
-    search_fields = ('post__title',)
-
-@admin.register(Location)
-class LocationAdmin(admin.ModelAdmin):
-    list_display = ('name', 'address', 'latitude', 'longitude', 'post')
-    search_fields = ('name', 'address')
-
-@admin.register(Comment)
-class CommentAdmin(admin.ModelAdmin):
-    list_display = ('author', 'post', 'created_at', 'parent')
-    list_filter = ('created_at',)
-    search_fields = ('content', 'author__username', 'post__title')
-
-@admin.register(Badge)
 class BadgeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'points')
-    search_fields = ('name', 'description')
+    list_display = ('name', 'points_required', 'created_at')
+    search_fields = ('name',)
 
-@admin.register(UserBadge)
 class UserBadgeAdmin(admin.ModelAdmin):
     list_display = ('user', 'badge', 'earned_at')
-    list_filter = ('earned_at', 'badge')
     search_fields = ('user__username', 'badge__name')
 
-@admin.register(Challenge)
-class ChallengeAdmin(admin.ModelAdmin):
-    list_display = ('title', 'challenge_type', 'points', 'creator', 'created_at', 'expires_at')
-    list_filter = ('challenge_type', 'created_at')
-    search_fields = ('title', 'description')
+class GroupMembershipInline(admin.TabularInline):
+    model = GroupMembership
+    extra = 1
 
-@admin.register(UserChallenge)
-class UserChallengeAdmin(admin.ModelAdmin):
-    list_display = ('user', 'challenge', 'completed', 'completed_at')
-    list_filter = ('completed', 'completed_at')
-    search_fields = ('user__username', 'challenge__title')
+class GroupAdmin(admin.ModelAdmin):
+    list_display = ('name', 'creator', 'created_at')
+    search_fields = ('name', 'description', 'creator__username')
+    inlines = [GroupMembershipInline]
 
-@admin.register(Quiz)
-class QuizAdmin(admin.ModelAdmin):
-    list_display = ('title', 'challenge')
-    search_fields = ('title', 'description')
+class CommentInline(admin.TabularInline):
+    model = Comment
+    extra = 1
 
-@admin.register(QuizQuestion)
-class QuizQuestionAdmin(admin.ModelAdmin):
-    list_display = ('question_text', 'quiz', 'order')
-    list_filter = ('quiz',)
-    search_fields = ('question_text',)
+class PostAdmin(admin.ModelAdmin):
+    list_display = ('title', 'author', 'group', 'created_at')
+    search_fields = ('title', 'content', 'author__username', 'group__name')
+    inlines = [CommentInline]
 
-@admin.register(QuizAnswer)
-class QuizAnswerAdmin(admin.ModelAdmin):
-    list_display = ('answer_text', 'question', 'is_correct')
-    list_filter = ('is_correct',)
-    search_fields = ('answer_text',)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('author', 'post', 'created_at')
+    search_fields = ('content', 'author__username', 'post__title')
 
-@admin.register(Product)
-class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'barcode', 'sustainability_score', 'is_recyclable')
-    list_filter = ('is_recyclable',)
-    search_fields = ('name', 'barcode', 'description')
-
-@admin.register(RecognizedObject)
 class RecognizedObjectAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category')
-    list_filter = ('category',)
-    search_fields = ('name', 'description')
+    list_display = ('name', 'category', 'sustainability_score', 'created_at')
+    search_fields = ('name', 'description', 'category')
+    list_filter = ('category', 'sustainability_score')
+
+class ScanRecordAdmin(admin.ModelAdmin):
+    list_display = ('user', 'recognized_object', 'created_at')
+    search_fields = ('user__username', 'recognized_object__name', 'location_name')
+    list_filter = ('recognized_object__category',)
+
+class QuizOptionInline(admin.TabularInline):
+    model = QuizOption
+    extra = 3
+
+class QuizQuestionAdmin(admin.ModelAdmin):
+    list_display = ('question', 'quiz')
+    search_fields = ('question', 'quiz__title')
+    inlines = [QuizOptionInline]
+
+class QuizQuestionInline(admin.TabularInline):
+    model = QuizQuestion
+    extra = 1
+
+class QuizAdmin(admin.ModelAdmin):
+    list_display = ('title', 'points', 'created_at')
+    search_fields = ('title', 'description')
+    inlines = [QuizQuestionInline]
+
+class QuizAttemptAdmin(admin.ModelAdmin):
+    list_display = ('user', 'quiz', 'score', 'completed', 'started_at', 'completed_at')
+    search_fields = ('user__username', 'quiz__title')
+    list_filter = ('completed',)
+
+class ChallengeAdmin(admin.ModelAdmin):
+    list_display = ('title', 'points', 'start_date', 'end_date', 'created_at')
+    search_fields = ('title', 'description')
+    list_filter = ('start_date', 'end_date')
+
+class ChallengeParticipationAdmin(admin.ModelAdmin):
+    list_display = ('user', 'challenge', 'completed', 'joined_at', 'completed_at')
+    search_fields = ('user__username', 'challenge__title')
+    list_filter = ('completed',)
+
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ('name', 'barcode', 'manufacturer', 'eco_friendly', 'recyclable', 'sustainability_score')
+    search_fields = ('name', 'description', 'barcode', 'manufacturer')
+    list_filter = ('eco_friendly', 'recyclable', 'sustainability_score')
+
+class ProductScanAdmin(admin.ModelAdmin):
+    list_display = ('user', 'product', 'created_at')
+    search_fields = ('user__username', 'product__name', 'product__barcode')
+
+# Registrazione dei modelli
+admin.site.register(Profile, ProfileAdmin)
+admin.site.register(Badge, BadgeAdmin)
+admin.site.register(UserBadge, UserBadgeAdmin)
+admin.site.register(Group, GroupAdmin)
+admin.site.register(Post, PostAdmin)
+admin.site.register(Comment, CommentAdmin)
+admin.site.register(RecognizedObject, RecognizedObjectAdmin)
+admin.site.register(ScanRecord, ScanRecordAdmin)
+admin.site.register(Quiz, QuizAdmin)
+admin.site.register(QuizQuestion, QuizQuestionAdmin)
+admin.site.register(QuizAttempt, QuizAttemptAdmin)
+admin.site.register(Challenge, ChallengeAdmin)
+admin.site.register(ChallengeParticipation, ChallengeParticipationAdmin)
+admin.site.register(Product, ProductAdmin)
+admin.site.register(ProductScan, ProductScanAdmin)
