@@ -16,7 +16,7 @@ from .serializers import (
     PostSerializer, PostDetailSerializer, CommentSerializer,
     RecognizedObjectSerializer, ScanRecordSerializer, QuizSerializer,
     QuizDetailSerializer, QuizAttemptSerializer, ChallengeSerializer,
-    ChallengeParticipationSerializer, ProductSerializer, ProductScanSerializer
+    ChallengeParticipationSerializer, ProductSerializer, ProductScanSerializer, GroupMembershipSerializer
 )
 from .permissions import IsOwnerOrReadOnly, IsGroupMember, IsGroupAdmin
 
