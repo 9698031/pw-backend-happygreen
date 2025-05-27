@@ -4,15 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6b345eef-03a2-40c6-b1bb-650bd3059cee" name="Changes" comment="Quarto Commit - Backend Completo?">
-      <change afterPath="$PROJECT_DIR$/db/script.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/backend-happygreen.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/backend-happygreen.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend_happygreen/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend_happygreen/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-    </list>
+    <list default="true" id="6b345eef-03a2-40c6-b1bb-650bd3059cee" name="Changes" comment="commit prof Costa" />
     <list id="1ef2569d-63e2-4fe5-a7ea-ff02aa343cd4" name="Changes by dansa" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -132,7 +124,7 @@
       <workItem from="1746522372509" duration="383000" />
       <workItem from="1747034632074" duration="730000" />
       <workItem from="1747036335011" duration="293000" />
-      <workItem from="1748330284368" duration="5583000" />
+      <workItem from="1748330284368" duration="5824000" />
     </task>
     <task id="LOCAL-00001" summary="Primo Commit - Progetto Vuoto">
       <option name="closed" value="true" />
@@ -166,7 +158,15 @@
       <option name="project" value="LOCAL" />
       <updated>1746007364570</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="commit prof Costa">
+      <option name="closed" value="true" />
+      <created>1748363829222</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1748363829222</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -200,6 +200,7 @@
     <MESSAGE value="Secondo Commit - Prima Giornata e pip install" />
     <MESSAGE value="Terzo Commit - Seconda Giornata e risoluzione errori" />
     <MESSAGE value="Quarto Commit - Backend Completo?" />
-    <option name="LAST_COMMIT_MESSAGE" value="Quarto Commit - Backend Completo?" />
+    <MESSAGE value="commit prof Costa" />
+    <option name="LAST_COMMIT_MESSAGE" value="commit prof Costa" />
   </component>
 </project>

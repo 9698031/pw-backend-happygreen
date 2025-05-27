@@ -14,7 +14,7 @@ services:
   web:
     image: python:3.9.22
     ports:
-      - "8000:8000"
+      - "8004:8000"
     volumes:
       - .:/usr/app
     working_dir: /usr/app
