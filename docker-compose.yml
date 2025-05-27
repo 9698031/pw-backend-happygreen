@@ -1,0 +1,30 @@
+
+services:
+  db:
+    image: mariadb:10.5.8
+    environment:
+      MYSQL_ROOT_PASSWORD: rootroot
+      #MYSQL_DATABASE: pwtriptales_db
+      #MYSQL_USER: root
+      #MYSQL_PASSWORD: rootroot
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d
+  web:
+    image: python:3.9.22
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/usr/app
+    working_dir: /usr/app
+    command: >
+      sh -c "sleep 5 &&
+             pip install --no-cache-dir -r requirements.txt &&
+             python manage.py migrate &&
+             python manage.py createsuperuser &&
+             python manage.py create_initial_data &&
+             mkdir -p media/avatars media/badges media/posts media/objects media/products &&
+             python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - db

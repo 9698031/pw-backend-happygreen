@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-r0og+$hdxne=u0ltf34w+5vvc97im2lndn4-%dq)*ro_$^4gch
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -83,27 +83,27 @@ WSGI_APPLICATION = 'backend_happygreen.wsgi.application'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 # SQLite (per lo sviluppo)
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.sqlite3',
+#        'NAME': BASE_DIR / 'db.sqlite3',
+#    }
+#}
 
 # MySQL (per la produzione)
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'pwhappygreen_db',
-#         'USER': 'pwhappygreen_user',
-#         'PASSWORD': 'password',
-#         'HOST': 'localhost',
-#         'PORT': '3306',
-#         'OPTIONS': {
-#             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-#         },
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'pwhappygreen_db',
+        'USER': 'root',
+        'PASSWORD': 'rootroot',
+        'HOST': 'db',
+        'PORT': '3306',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
+    }
+}
 
 
 # Password validation
@@ -194,11 +194,9 @@ SIMPLE_JWT = {
 
 # CORS settings
 CORS_ALLOW_ALL_ORIGINS = True  # In produzione, specificare gli origin consentiti
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:8000",
-#     "http://127.0.0.1:8000",
-#     "https://yourandroidapp.example.com",
-# ]
+CORS_ALLOWED_ORIGINS = [
+     "http://pjwrossi5.duckdns.org:8004",
+]
 
 # Swagger settings
 SWAGGER_SETTINGS = {
